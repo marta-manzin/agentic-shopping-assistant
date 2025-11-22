@@ -7,11 +7,12 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.18.1
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
+#     language: python
 #     name: python3
 # ---
 
-# %% [markdown] id="view-in-github" colab_type="text"
+# %% [markdown] colab_type="text" id="view-in-github"
 # <a href="https://colab.research.google.com/github/marta-manzin/agentic-shopping-assistant/blob/main/agentic_shopping_assistant.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
 # %% [markdown] id="TOnQyK7obg_s"
@@ -48,10 +49,14 @@
 # %% [markdown] id="kZxTvnYm8Q1O"
 # Let's test it. First, import the key into the notebook:
 
-# %% id="NMnTB-ChZqHp"
-from google.colab import userdata
+# %%
 import os
-os.environ["OPENAI_API_KEY"] = userdata.get("OPENAI_API_KEY")
+try:
+  from google.colab import userdata
+  IN_COLAB = True
+  os.environ["OPENAI_API_KEY"] = userdata.get("OPENAI_API_KEY")
+except:
+  IN_COLAB = False    
 
 # %% [markdown] id="aIdi2xjLbWOX"
 # Then, make a test call to OpenAI:
@@ -473,7 +478,7 @@ await test_client()
 # %% [markdown] id="hhA0L8dUNvYJ"
 # # 🧠 Orchestration with LangGraph
 
-# %% id="qrIbDfYJN3y0" colab={"base_uri": "https://localhost:8080/"} outputId="2f685b79-a59b-4f6d-9253-5f1f871ae4a7"
+# %% colab={"base_uri": "https://localhost:8080/"} id="qrIbDfYJN3y0" outputId="2f685b79-a59b-4f6d-9253-5f1f871ae4a7"
 # %pip install --quiet "langchain-openai>=0.2,<1.0" "langchain_mcp_adapters" "langgraph"
 
 # %% colab={"base_uri": "https://localhost:8080/"} id="5x5y8R-nkMrq" outputId="e9218aef-d93e-4a0a-8420-51855447b3fc"
