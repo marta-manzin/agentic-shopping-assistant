@@ -387,9 +387,10 @@ print("✓ FastAPI app created")
 import threading
 import uvicorn
 import sys
+import random
 
 # The port number where the server will listen
-server_port = 8000
+server_port = random.randint(49152, 65535)
 
 def run_server():
     """Run the uvicorn server. This will be called in a background thread."""
@@ -489,7 +490,7 @@ client = MultiServerMCPClient(
     {
         "set-server": {
             "transport": "sse",
-            "url": "http://localhost:8000/sse",
+            "url": f"http://localhost:{server_port}/sse",
         }
     }
 )
