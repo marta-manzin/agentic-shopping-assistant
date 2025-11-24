@@ -1,6 +1,7 @@
 # ---
 # jupyter:
 #   jupytext:
+#     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
 #       format_name: percent
@@ -381,7 +382,7 @@ print("✓ FastAPI app created")
 # %% [markdown] id="v1Sp7zRqBjV7"
 # Start the MCP server in the background.
 
-# %% colab={"base_uri": "https://localhost:8080/"} id="oNMPNYGRBnDF" outputId="baa2739a-8dad-4661-8a78-6e9337bdd536"
+# %%
 # Uvicorn is a web server that handles HTTP requests and asynchronous code
 # %pip install --quiet uvicorn
 import threading
@@ -416,23 +417,27 @@ print(f"  Server available at http://127.0.0.1:{server_port}/sse")
 
 # %% colab={"base_uri": "https://localhost:8080/"} id="VnEligIZB4qz" outputId="d9d4e412-3bd0-437e-aefc-5519f5c43870"
 import time
+import socket
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.settimeout(1)
 
 # Try up to 5 times to verify the server started successfully
 for attempt in range(1, 6):
-    # Use lsof to check if any process is listening on the server port
-    # result = !lsof -i :{server_port}
-
-    # If lsof found a process, it returns output lines; if not, the list is empty or has just headers
-    if len(result) > 1:  # More than just the header line means a process was found
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(1)
+    
+    try:
+        sock.connect(("127.0.0.1", server_port))
         print(f"✓ Port {server_port} is open (attempt {attempt}/5)")
-        for line in result:
-            print(line)
-        break  # Exit the loop early since we confirmed the server is running
-    else:
+        sock.close()
+        break   # Exit the loop early since we confirmed the server is running
+    except: 
         print(f"⏳ Attempt {attempt}/5: Port {server_port} not ready yet...")
         # Wait 1 second before trying again (unless this is the last attempt)
         if attempt < 5:
             time.sleep(1)
+
 else:
     # This else block runs if we never broke out of the loop (all 5 attempts failed)
     print(f"✗ Port {server_port} is not open after 5 attempts")
