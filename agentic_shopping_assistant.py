@@ -1,6 +1,7 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: tags,-editable,-slideshow,-colab
 #     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
@@ -51,6 +52,7 @@
 # Let's test it. First, import the key into the notebook:
 
 # %%
+# Where are we running
 import os
 try:
   from google.colab import userdata
@@ -59,10 +61,18 @@ try:
 except:
   IN_COLAB = False    
 
+
+from IPython import get_ipython
+if get_ipython() is not None:
+    IN_JUPYTER = True
+else:
+    IN_JUPYTER = False
+("IN_COLAB:", IN_COLAB, "IN_JUPYTER:", IN_JUPYTER)
+
 # %% [markdown] id="aIdi2xjLbWOX"
 # Then, make a test call to OpenAI:
 
-# %% colab={"base_uri": "https://localhost:8080/"} id="FvlxGVjz8S7l" outputId="59d7e89b-f3f3-4eef-c05c-43fe696cf0a1"
+# %% id="FvlxGVjz8S7l" outputId="59d7e89b-f3f3-4eef-c05c-43fe696cf0a1"
 import openai
 client = openai.OpenAI()
 model = "gpt-4o"
@@ -259,10 +269,10 @@ def submit_request(
 # %% [markdown] id="NF26AUcTeM9C"
 # Let's test the agent!
 
-# %% colab={"base_uri": "https://localhost:8080/"} id="tfQWYK7ceHVY" outputId="5a260f5c-ba5c-4b83-fa20-d763911a678a"
+# %% id="tfQWYK7ceHVY" outputId="5a260f5c-ba5c-4b83-fa20-d763911a678a"
 submit_request("Please add 'apples', 'oranges' and 'pears' to the set.")
 
-# %% colab={"base_uri": "https://localhost:8080/"} id="dnCP2npeeYev" outputId="b3d7b53a-00c0-48ec-eb80-a13ed9ece4dd"
+# %% id="dnCP2npeeYev" outputId="b3d7b53a-00c0-48ec-eb80-a13ed9ece4dd"
 submit_request("Please remove 'oranges' from the set.")
 
 # %% [markdown] id="W_P3GEVCNTQ6"
@@ -271,7 +281,7 @@ submit_request("Please remove 'oranges' from the set.")
 # %% [markdown] id="rD6I4qqM3-K-"
 # Create the MCP server.
 
-# %% colab={"base_uri": "https://localhost:8080/"} id="Xem5Szb0AQqv" outputId="f8e8d00c-7514-41e9-9b11-dc2d53e0acb2"
+# %% id="Xem5Szb0AQqv" outputId="f8e8d00c-7514-41e9-9b11-dc2d53e0acb2"
 # %pip install --quiet mcp
 from mcp.server import Server
 from mcp.types import Tool, TextContent
@@ -283,7 +293,7 @@ print("✓ Server created")
 # %% [markdown] id="PuRlZnAYATtj"
 # Create an MCP wrapper for listing the available tools.
 
-# %% colab={"base_uri": "https://localhost:8080/", "height": 103} id="R4RQ-E6QArjt" outputId="93c8a3c4-94a1-49e3-c0f3-c3e72f11160e"
+# %% id="R4RQ-E6QArjt" outputId="93c8a3c4-94a1-49e3-c0f3-c3e72f11160e"
 async def list_tools() -> list[Tool]:
     """Return the list of available tools from our tools definition."""
     # Create an empty list to store MCP Tool objects
@@ -311,7 +321,7 @@ server.list_tools()(list_tools)
 # %% [markdown] id="NM4w_xtuAvHM"
 # Create an MCP wrapper for executing tools.
 
-# %% colab={"base_uri": "https://localhost:8080/", "height": 103} id="ib0oaEEQBJp2" outputId="38fbf6af-0db0-42d9-90fe-2d074d1e9ec4"
+# %% id="ib0oaEEQBJp2" outputId="38fbf6af-0db0-42d9-90fe-2d074d1e9ec4"
 from types import SimpleNamespace
 
 async def call_tool(name: str, arguments: dict) -> list[TextContent]:
@@ -341,7 +351,7 @@ server.call_tool()(call_tool)
 # %% [markdown] id="5_UTk9kMBXdv"
 # Expose an HTTP/SSE endpoint for the server.
 
-# %% colab={"base_uri": "https://localhost:8080/"} id="BJ57ifFcBbDx" outputId="a430872a-860f-411b-f7c3-9bf02c745ee2"
+# %% id="BJ57ifFcBbDx" outputId="a430872a-860f-411b-f7c3-9bf02c745ee2"
 # FastAPI is a framework for building REST APIs
 # %pip install --quiet fastapi
 from mcp.server.sse import SseServerTransport
@@ -415,7 +425,7 @@ print(f"  Server available at http://127.0.0.1:{server_port}/sse")
 # %% [markdown] id="YFpcTtJWB2-W"
 # Verify that the server port is open and listening.
 
-# %% colab={"base_uri": "https://localhost:8080/"} id="VnEligIZB4qz" outputId="d9d4e412-3bd0-437e-aefc-5519f5c43870"
+# %% id="VnEligIZB4qz" outputId="d9d4e412-3bd0-437e-aefc-5519f5c43870"
 import time
 import socket
 
@@ -446,7 +456,7 @@ else:
 # %% [markdown] id="6l0hKhJyCB7s"
 # Test the server with a dummy client.
 
-# %% colab={"base_uri": "https://localhost:8080/"} id="QQk64JgCvFrP" outputId="1ce97827-bf5b-4ff3-fa62-2975ebb941f5"
+# %% id="QQk64JgCvFrP" outputId="1ce97827-bf5b-4ff3-fa62-2975ebb941f5"
 from mcp import ClientSession
 from mcp.client.sse import sse_client
 
@@ -478,16 +488,28 @@ async def test_client():
             print("Result:", result.content[0].text)
             print("Current set:", MY_SET)
 
-# Run the async test function
-await test_client()
+
+# %%
+# I had to separate out the runing of the async functions at the top level because what works in jupyter
+# doesn't work in straight python.  And vice versa.  I will remove the day before class
+
+# %% tags=["active-ipynb"]
+# # Run the async test function
+# await test_client()
+
+# %% tags=["active-py"]
+# py version
+import asyncio
+if not IN_JUPYTER:
+    asyncio.run(test_client())
 
 # %% [markdown] id="hhA0L8dUNvYJ"
 # # 🧠 Orchestration with LangGraph
 
-# %% colab={"base_uri": "https://localhost:8080/"} id="qrIbDfYJN3y0" outputId="2f685b79-a59b-4f6d-9253-5f1f871ae4a7"
+# %% id="qrIbDfYJN3y0" outputId="2f685b79-a59b-4f6d-9253-5f1f871ae4a7"
 # %pip install --quiet "langchain-openai>=0.2,<1.0" "langchain_mcp_adapters" "langgraph"
 
-# %% colab={"base_uri": "https://localhost:8080/"} id="5x5y8R-nkMrq" outputId="e9218aef-d93e-4a0a-8420-51855447b3fc"
+# %% id="5x5y8R-nkMrq" outputId="e9218aef-d93e-4a0a-8420-51855447b3fc"
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
 # Create MCP client that connects to your set-server
@@ -500,13 +522,18 @@ client = MultiServerMCPClient(
     }
 )
 
-# Get available tools from the MCP server
-tools = await client.get_tools()
-print(f"✓ Loaded {len(tools)} tools from MCP server")
-for tool in tools:
-    print(f"  - {tool.name}: {tool.description}")
+# %% tags=["active-ipynb"]
+# # Get available tools from the MCP server
+# tools = await client.get_tools()
+# print(f"✓ Loaded {len(tools)} tools from MCP server")
+# for tool in tools:
+#     print(f"  - {tool.name}: {tool.description}")
 
-# %% colab={"base_uri": "https://localhost:8080/"} id="t_p_I0JokOjL" outputId="fb80bb10-ac50-4e5c-c93f-f744e81fae33"
+# %%
+if not IN_JUPYTER:
+    tools = asyncio.run(client.get_tools())
+
+# %% id="t_p_I0JokOjL" outputId="fb80bb10-ac50-4e5c-c93f-f744e81fae33"
 from langgraph.prebuilt import create_react_agent
 from langchain_openai import ChatOpenAI
 
@@ -518,11 +545,22 @@ agent_executor = create_react_agent(
 
 print("✓ LangGraph agent created")
 
-# %% colab={"base_uri": "https://localhost:8080/"} id="7zu7HEPAkQlc" outputId="637a962e-c096-4f8e-8671-0cf1b49f936d"
-result = await agent_executor.ainvoke({
-    "messages": [{"role": "user", "content": "Please add 'grapes', 'kiwi', and 'mango' to the set."}]
-})
+# %% tags=["active-ipynb"]
+# result = await agent_executor.ainvoke({
+#     "messages": [{"role": "user", "content": "Please add 'grapes', 'kiwi', and 'mango' to the set."}]
+# })
 
+# %%
+if not IN_JUPYTER:
+    result = asyncio.run(
+        agent_executor.ainvoke({
+            "messages": [{
+                "role": "user", 
+                "content": "Please add 'grapes', 'kiwi', and 'mango' to the set."}]
+        })
+    )
+
+# %% id="7zu7HEPAkQlc" outputId="637a962e-c096-4f8e-8671-0cf1b49f936d"
 # Display the conversation
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 
