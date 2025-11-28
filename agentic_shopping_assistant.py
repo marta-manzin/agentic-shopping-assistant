@@ -524,14 +524,14 @@ client = MultiServerMCPClient(
 
 # %% tags=["active-ipynb"]
 # # Get available tools from the MCP server
-# tools = await client.get_tools()
-# print(f"✓ Loaded {len(tools)} tools from MCP server")
-# for tool in tools:
+# tools_from_mcp = await client.get_tools()
+# print(f"✓ Loaded {len(tools_from_mcp)} tools from MCP server")
+# for tool in tools_from_mcp:
 #     print(f"  - {tool.name}: {tool.description}")
 
 # %%
 if not IN_JUPYTER:
-    tools = asyncio.run(client.get_tools())
+    tools_from_mcp = asyncio.run(client.get_tools())
 
 # %% id="t_p_I0JokOjL" outputId="fb80bb10-ac50-4e5c-c93f-f744e81fae33"
 from langgraph.prebuilt import create_react_agent
@@ -540,7 +540,7 @@ from langchain_openai import ChatOpenAI
 # Create a LangGraph agent using the tools we already loaded
 agent_executor = create_react_agent(
     ChatOpenAI(model="gpt-4o", temperature=0),
-    tools,
+    tools_from_mcp,
 )
 
 print("✓ LangGraph agent created")
