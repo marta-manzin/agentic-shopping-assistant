@@ -507,6 +507,7 @@ if not IN_JUPYTER:
 # # 🧠 Orchestration with LangGraph
 
 # %% id="qrIbDfYJN3y0" outputId="2f685b79-a59b-4f6d-9253-5f1f871ae4a7"
+# %pip uninstall -y -qqq langchain  
 # %pip install --quiet "langchain-openai>=0.2,<1.0" "langchain_mcp_adapters" "langgraph"
 
 # %% id="5x5y8R-nkMrq" outputId="e9218aef-d93e-4a0a-8420-51855447b3fc"
