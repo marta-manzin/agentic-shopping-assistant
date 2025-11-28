@@ -496,7 +496,7 @@ async def test_client():
 # # Run the async test function
 # await test_client()
 
-# %% tags=["active-py"]
+# %% raw_mimetype=""
 # py version
 import asyncio
 if not IN_JUPYTER:
