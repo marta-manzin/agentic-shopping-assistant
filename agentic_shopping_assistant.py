@@ -52,22 +52,21 @@
 # Let's test it. First, import the key into the notebook:
 
 # %%
-# Where are we running
 import os
 try:
   from google.colab import userdata
-  IN_COLAB = True
   os.environ["OPENAI_API_KEY"] = userdata.get("OPENAI_API_KEY")
 except:
-  IN_COLAB = False    
+  pass
 
-
+# %%
+# Where are we running
 from IPython import get_ipython
 if get_ipython() is not None:
     IN_JUPYTER = True
 else:
     IN_JUPYTER = False
-("IN_COLAB:", IN_COLAB, "IN_JUPYTER:", IN_JUPYTER)
+("IN_JUPYTER:", IN_JUPYTER)
 
 # %% [markdown] id="aIdi2xjLbWOX"
 # Then, make a test call to OpenAI:
