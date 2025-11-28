@@ -92,7 +92,7 @@ print(f"LLM test: {response.choices[0].message.content}")
 # We will build an agent that adds and removes strings from a set.
 
 # %% [markdown] id="ujra-LLDcaeP"
-# The System Prompt gives some context to the LLM.
+# ## The System Prompt gives some context to the LLM.
 
 # %% id="u2p8auWt_fGE"
 SYSTEM_PROMPT = """
@@ -104,7 +104,7 @@ You have access to tools that let you:
 """
 
 # %% [markdown] id="XwzdXKyycs0P"
-# Here are the available tools:
+# ## Here are the available tools:
 
 # %% id="eM8NowbiOv74"
 MY_SET = set()
@@ -120,7 +120,7 @@ def removal_tool(s: str):
 
 
 # %% [markdown] id="AOlTPB1RcVDH"
-# Provide a description of each tool to the LLM. \
+# ## Provide a description of each tool to the LLM.
 # The LLM will use it to decide which tools to call and with what arguments.
 
 # %% id="qY3nlJhU-x7U"
@@ -162,7 +162,7 @@ tools = [
 ]
 
 # %% [markdown] id="FTe3UobJc8DF"
-# If the LLM decides to run a tool, it will respond with a "tool call" object. \
+# ## If the LLM decides to run a tool, it will respond with a "tool call" object.
 # A tool call looks like this:
 #
 # ```
@@ -176,9 +176,9 @@ tools = [
 # }
 # ```
 #
-# The following code parses a tool call and runs the tool.
-#
-#
+
+# %% [markdown]
+# ## The following code parses a tool call and runs the tool.
 
 # %% id="u5YkPNiU_iKR"
 import json
@@ -210,12 +210,10 @@ def execute(tool_call) -> str:
 
 
 # %% [markdown] id="QyOsu-4tleGP"
-# And last, the agent logic. \
+# ## And last, the agent logic. 
 # Instead of using a ready-made framework, the code below does *direct orchestration*.
 
 # %% id="u4B9C8CKXmOm"
-import itertools
-
 def submit_request(
     user_prompt: str,
     verbose: bool = True
@@ -227,7 +225,7 @@ def submit_request(
         {"role": "user", "content": user_prompt}
     ]
 
-    for iteration in itertools.count(1):
+    while True:
 
         # Ask the agent what to do next
         response = client.chat.completions.create(
@@ -266,13 +264,213 @@ def submit_request(
 
 
 # %% [markdown] id="NF26AUcTeM9C"
-# Let's test the agent!
+# ## Let's test the agent!
 
 # %% id="tfQWYK7ceHVY" outputId="5a260f5c-ba5c-4b83-fa20-d763911a678a"
 submit_request("Please add 'apples', 'oranges' and 'pears' to the set.")
 
 # %% id="dnCP2npeeYev" outputId="b3d7b53a-00c0-48ec-eb80-a13ed9ece4dd"
 submit_request("Please remove 'oranges' from the set.")
+
+# %% [markdown]
+# ## Let's watch it work one step at a time
+
+# %%
+MY_SET = set()
+user_prompt = "Please add 'apples', 'oranges' and 'pears' to the set."
+verbose = True
+
+"""Submit a request to the agent and run any tools it calls."""
+# Initialize the chat history
+messages = [
+    {"role": "system", "content": SYSTEM_PROMPT},
+    {"role": "user", "content": user_prompt}
+]
+messages
+
+# %%
+# Ask the agent what to do next
+response = client.chat.completions.create(
+    model=model,
+    messages=messages,
+    tools=tools,
+    tool_choice="auto"
+).choices[0].message
+response
+
+# %%
+# Update the chat history with the agent's response
+messages.append({
+    "role": "assistant",
+    "content": response.content,
+    "tool_calls": response.tool_calls
+})
+messages
+
+# %%
+# If agent did not call any tools, we are done
+if not response.tool_calls:
+    if verbose:
+      print(f"\n⭐ The resulting set is: {MY_SET}")
+    print("We are done")
+
+# %%
+# Show me the tools that the agent is requesting I call.
+for tool_call in response.tool_calls:
+    if verbose:
+      print(f"\n🔧 The agent is requesting: "
+          f"{tool_call.function.name}"
+          f"({json.loads(tool_call.function.arguments)})")
+
+# %%
+# execute one
+outcome = execute(response.tool_calls[0])
+outcome, MY_SET
+
+# %%
+# append the outcome (which is not interesting in this case) to the message list
+messages.append({
+    "role": "tool",
+    "tool_call_id": tool_call.id,
+    "content": str(outcome)
+})
+messages
+
+# %%
+# All together now
+MY_SET = set()
+def submit_request(
+    user_prompt: str,
+    verbose: bool = True
+    ):
+    """Submit a request to the agent and run any tools it calls."""
+    # Initialize the chat history
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": user_prompt}
+    ]
+
+    while True:
+
+        # Ask the agent what to do next
+        response = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            tools=tools,
+            tool_choice="auto"
+        ).choices[0].message
+
+        # Update the chat history with the agent's response
+        messages.append({
+            "role": "assistant",
+            "content": response.content,
+            "tool_calls": response.tool_calls
+        })
+
+        # If agent did not call any tools, we are done
+        if not response.tool_calls:
+            if verbose:
+              print(f"\n⭐ The resulting set is: {MY_SET}")
+            break
+
+        # Execute all tool calls
+        for tool_call in response.tool_calls:
+            if verbose:
+              print(f"\n🔧 The agent is calling a tool: "
+                  f"{tool_call.function.name}"
+                  f"({json.loads(tool_call.function.arguments)})")
+
+            outcome = execute(tool_call)
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": str(outcome)
+            })
+submit_request("Please add 'apples', 'oranges' and 'pears' to the set.")
+submit_request("Please remove 'oranges' from the set.")
+
+# %% [markdown]
+# ## As a bonus, let's walk through what the tool call looks like
+# As a reminder, here's the function we will set through:
+
+# %%
+import json
+
+def execute(tool_call) -> str:
+    """Execute a tool call and return the result, if any."""
+    # Extract the function name from the tool call
+    function_name = tool_call.function.name
+
+    # Parse the arguments from JSON string to dictionary
+    arguments = json.loads(tool_call.function.arguments)
+
+    # Look up the function by name in the global scope
+    tool_func = globals().get(function_name)
+
+    # Check if the function exists and is callable
+    if tool_func is None or not callable(tool_func):
+        return f"Unknown function: {function_name}"
+
+    # Call the function with the unpacked arguments
+    response = tool_func(**arguments)
+
+    # Return the result of the function call, if any
+    if response:
+      return str(response)
+    else:
+      return ""
+
+
+# %%
+MY_SET = set()
+
+# %%
+tool_call = response.tool_calls[0]
+assert tool_call is not None # if the assertion fails, run all above from the Run menu.
+tool_call
+
+# %%
+# Extract the function name from the tool call
+function_name = tool_call.function.name
+function_name
+
+# %%
+# Parse the arguments from JSON string to dictionary
+arguments = json.loads(tool_call.function.arguments)
+arguments
+
+# %%
+# Look up the function by name in the global scope
+tool_func = globals().get(function_name)
+tool_func
+
+# %%
+# Check if the function exists and is callable
+if tool_func is None or not callable(tool_func):
+    print(f"Unknown function: {function_name}")
+
+# %%
+# Call the function with the unpacked arguments
+print("Before", MY_SET)
+response = tool_func(**arguments)
+print("After", MY_SET)
+
+# %%
+# Return the result of the function call, if any
+if response:
+  print("would return", str(response))
+else:
+  print("would return", "", "(empty string)")
+
+# %% [markdown]
+# ## That's it.  A while True loop with tool calls when the LLM requests it.  
+
+# %%
+from IPython.display import HTML, display
+
+file_id = "1ZvloSCljBk35S0y2jpuf_E4hYufflj4V"
+html = f'<img src="https://drive.google.com/thumbnail?id={file_id}&sz=w2000" width="800" />'
+display(HTML(html))
 
 # %% [markdown] id="W_P3GEVCNTQ6"
 # # 🗄️ Creating an MCP Server
