@@ -191,6 +191,11 @@ def execute(tool_call) -> str:
     # Parse the arguments from JSON string to dictionary
     arguments = json.loads(tool_call.function.arguments)
 
+    # Important! Verify that the function is one of the allowed tools
+    allowed_tool_names = [tool["function"]["name"] for tool in tools]
+    if function_name not in allowed_tool_names:
+        return f"Error: '{function_name}' is not an allowed tool"
+
     # Look up the function by name in the global scope
     tool_func = globals().get(function_name)
 
@@ -403,6 +408,11 @@ def execute(tool_call) -> str:
 
     # Parse the arguments from JSON string to dictionary
     arguments = json.loads(tool_call.function.arguments)
+
+    # Important! Verify that the function is one of the allowed tools
+    allowed_tool_names = [tool["function"]["name"] for tool in tools]
+    if function_name not in allowed_tool_names:
+        return f"Error: '{function_name}' is not an allowed tool"
 
     # Look up the function by name in the global scope
     tool_func = globals().get(function_name)
