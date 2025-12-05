@@ -27,8 +27,7 @@
 # 3. Create an MCP server
 # 4. Create a LangGraph agent
 # <br/>
-# <img src="https://drive.google.com/uc?export=view&id=1to-6-8fnbAJ9bLTBWSf5buay6d2h94qw" width="500">
-#
+# <img src="https://raw.githubusercontent.com/marta-manzin/agentic-shopping-assistant/refs/heads/main/images/shopping-cart.png" width="500">
 
 # %% [markdown] id="4irdiFHM8Nz7"
 # # ⚙️ Setup
@@ -43,7 +42,7 @@
 # 3. Name the variable and paste the key in the value field.
 # 4. Enable notebook access.
 #
-# <img src="https://drive.google.com/uc?export=view&id=1lMPgLbeqZ1lxYMQwbe5F3n9Qko4u55FH" width="450">
+# <img src="https://raw.githubusercontent.com/marta-manzin/agentic-shopping-assistant/refs/heads/main/images/setting-up-colab-secret.png" width="450">
 #
 #
 #
@@ -465,12 +464,8 @@ else:
 # %% [markdown]
 # ## That's it.  A while True loop with tool calls when the LLM requests it.  
 
-# %%
-from IPython.display import HTML, display
-
-file_id = "1ZvloSCljBk35S0y2jpuf_E4hYufflj4V"
-html = f'<img src="https://drive.google.com/thumbnail?id={file_id}&sz=w2000" width="800" />'
-display(HTML(html))
+# %% [markdown]
+# <img src="https://raw.githubusercontent.com/marta-manzin/agentic-shopping-assistant/refs/heads/main/images/Agentic-flow.png" width="500">
 
 # %% [markdown] id="W_P3GEVCNTQ6"
 # # 🗄️ Creating an MCP Server
