@@ -1,0 +1,110 @@
+Please complete this task (bug fix, modernization, enhancement, or new application):
+
+{{user-prompt}}
+
+You can use the bash tool to execute commands and manipulate files to implement the necessary changes.
+
+Task types you may encounter:
+- Bug fix: Identify and resolve a defect.
+- Modernization: Update outdated dependencies, APIs, build tooling, or code patterns.
+- Enhancement: Add or improve functionality, performance, or UX.
+- New application: Scaffold a fresh project and deliver a minimal, runnable MVP with docs/tests.
+
+## Recommended Workflow
+
+This workflow should be done step-by-step so that you can iterate on your changes and any possible problems. Determine the task type first and follow the relevant branch below.
+
+1. Analyze the codebase by finding and reading relevant files
+2. Define the task type (Bug fix / Modernization / Enhancement / New application) and acceptance criteria
+3. If Bug fix:
+   a. Reproduce the issue or create a minimal reproduction script
+   b. Identify the root cause in the code
+   c. Edit the source code to resolve the issue
+   d. Verify the fix by running the reproduction again
+4. If Modernization:
+   a. Inventory outdated dependencies, APIs, build tooling, and patterns
+   b. Propose a minimal, safe modernization plan (scoped to this task)
+   c. Apply updates incrementally (dependencies, code changes, config/build)
+   d. Ensure backward compatibility or provide migration notes as needed
+5. If Enhancement:
+   a. Specify the new or improved behavior (UI/API/contracts)
+   b. Implement the change with clear, maintainable code and tests
+   c. Update documentation or usage examples if applicable
+6. If New application:
+   a. Confirm requirements, scope, target runtime, and preferred stack
+   b. Scaffold project structure and tooling (venv/package manager, lint/format, tests, CI optional)
+   c. Initialize minimal dependencies with pinned versions
+   d. Implement MVP feature(s) with clear entrypoint(s) (CLI/HTTP/UI)
+   e. Provide run/build/test commands and ensure the app starts cleanly
+   f. Add minimal docs: README with setup, usage, architecture, and key decisions
+   g. Add basic tests and sample config/data as needed
+   h. Package or containerize if appropriate (optional)
+7. Test edge cases, performance implications, and regression risks
+8. Clean up all temporary files you created (test scripts, backup files, patch files, etc.) and terminate any background processes you started to leave the repository clean
+9. Submit your changes and finish your work by calling the bash tool with the command: `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT`.
+   Do not combine it with any other command. <important>After this command, you cannot continue working on this task.</important>
+
+## Important Rules
+
+1. Directory or environment variable changes are not persistent. Every bash command is executed in a new subshell.
+   However, you can prefix any command with `MY_ENV_VAR=MY_VALUE cd /path/to/working/dir && ...` or write/load environment variables from files
+
+## Testing Constraints and Patterns
+
+**CRITICAL:** The bash shell is non-interactive. Commands that block
+waiting for input or running servers in the foreground WILL HANG
+INDEFINITELY. You must manage background processes explicitly.
+
+1. **NEVER run long-lived servers in the foreground** - they will
+   hang the shell. Always use `&` to background them.
+2. If you must start a server to test endpoints:
+   - Start it in the background with `&` and capture `$!` as the PID
+   - Probe for readiness using retries with timeouts
+   - Run your test assertions (curl, wget, etc.)
+   - Kill the process and wait for cleanup
+3. Prefer unit tests over integration tests when possible to avoid
+   server management complexity.
+4. Use environment variables for PORTs; default to 3000 when
+   unstated.
+5. Always terminate background processes during cleanup (step 8).
+
+Example pattern for HTTP server testing:
+
+```bash
+# 1) Choose a port and start server in background
+PORT=${PORT:-3000}
+cd path/to/app || exit 1
+python3 -m http.server "$PORT" >/tmp/app_server.log 2>&1 &
+SERVER_PID=$!
+
+# 2) Wait for readiness with timeout (10s) and retries
+READY=0
+for i in $(seq 1 20); do
+  curl --silent --fail --max-time 1 \
+    "http://localhost:$PORT/" >/dev/null && { READY=1; break; }
+  sleep 0.5
+done
+[ "$READY" -eq 1 ] || {
+  echo "Server failed to start";
+  kill $SERVER_PID || true;
+  exit 1;
+}
+
+# 3) Run test assertions
+curl --silent --fail "http://localhost:$PORT/" | grep "expected"
+EXIT_CODE=$?
+
+# 4) ALWAYS teardown - kill server and wait for cleanup
+kill $SERVER_PID
+wait $SERVER_PID 2>/dev/null || true
+
+exit $EXIT_CODE
+```
+
+Static apps: Prefer direct file checks (HTML/JS/CSS) or serve via
+a lightweight server as above. For unit tests, run the project's
+test runner without starting a server if possible.
+
+<system_information>
+ {{platform-uname}}
+</system_information>
