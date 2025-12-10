@@ -3,7 +3,10 @@ name = "agentic-shopping-assistant"
 version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
+    "fastapi>=0.124.2",
+    "mcp>=1.23.3",
     "openai>=2.8.1",
+    "uvicorn>=0.38.0",
 ]
 
 [dependency-groups]
